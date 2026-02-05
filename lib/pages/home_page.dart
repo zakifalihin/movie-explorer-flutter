@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/widgets/movie_section.dart';
 import '../models/movie.dart';
-import '../widgets/movie_card.dart';
+import '../services/movie_service.dart';
+import '../providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,47 +13,99 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Movie> movies = [
-    Movie(
-      title: 'Interstellar',
-      posterPath:
-      'https://image.tmdb.org/t/p/w500/8N0DNa1lN0kQnGJ1mP2pOe1xE9Z.jpg',
-      rating: '8.6',
-      overview:
-      'A team of explorers travel through a wormhole in space in an attempt to ensure humanity’s survival.',
-    ),
-    Movie(
-      title: 'Inception',
-      posterPath:
-      'https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg',
-      rating: '8.8',
-      overview:
-      'A thief who steals corporate secrets through dream-sharing technology is given an inverse task.',
-    ),
-  ];
+  List<Movie> popularMovies = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadMovies();
+  }
+
+  Future<void> loadMovies() async {
+    final movies = await MovieService.getPopularMovies(1);
+    setState(() {
+      popularMovies = movies;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Popular Movies'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: GridView.builder(
-          itemCount: movies.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.65,
+        backgroundColor: Colors.black,
+        title: const Text('MovieFlix'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.dark_mode),
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
           ),
-          itemBuilder: (context, index) {
-            return MovieCard(movie: movies[index]);
+          const SizedBox(width: 12),
+        ],
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+        children: [
+          _buildBanner(popularMovies.first),
+          const SizedBox(height: 16),
+          MovieSection(
+            title: 'Popular Movies',
+            movies: popularMovies,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBanner(Movie movie) {
+    return Stack(
+      children: [
+        Image.network(
+          'https://image.tmdb.org/t/p/w500${movie.posterPath}',
+          height: 220,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+
+        IconButton(
+          icon: const Icon(Icons.dark_mode),
+          onPressed: () {
+            Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
           },
         ),
-      ),
+        Container(
+          height: 220,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.1),
+                Colors.black.withOpacity(0.9),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 16,
+          left: 16,
+          right: 16,
+          child: Text(
+            movie.title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )
+      ],
     );
   }
 }
