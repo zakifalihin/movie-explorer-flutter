@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('MovieFlix'),
+        title: const Text('JackMovs'),
         centerTitle: false,
         actions: [
           IconButton(
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
           _buildBanner(popularMovies.first),
           const SizedBox(height: 16),
           MovieSection(
-            title: 'Popular Movies',
+            title: 'Popular JackMovs',
             movies: popularMovies,
           ),
         ],
@@ -86,8 +86,8 @@ class _HomePageState extends State<HomePage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
+                // ignore: deprecated_member_use
                 Colors.black.withOpacity(0.1),
-                Colors.black.withOpacity(0.9),
               ],
             ),
           ),
